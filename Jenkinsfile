@@ -1,14 +1,14 @@
-// Jenkinsfile - VERSION PYTHON 
+// Jenkinsfile - VERSION PYTHON AVEC DOCKER-IN-DOCKER
 pipeline {
     agent {
         docker {
-            image 'python:3.9-slim'  // ← Image Python légère
-            args '-u root'  // Permissions root
+            image 'docker:latest'  // Image avec Docker inclus
+            args '-v /var/run/docker.sock:/var/run/docker.sock -u root'
         }
     }
     
     options {
-        timeout(time: 10, unit: 'MINUTES')  
+        timeout(time: 10, unit: 'MINUTES')
         buildDiscarder(logRotator(numToKeepStr: '10'))
         disableConcurrentBuilds()
     }
@@ -26,7 +26,7 @@ pipeline {
     }
     
     environment {
-        DOCKER_IMAGE = 'basta-scraper-python'  
+        DOCKER_IMAGE = 'basta-scraper-python'
         RESULTS_DIR = 'jenkins-results'
     }
     
@@ -37,15 +37,17 @@ pipeline {
                 script {
                     if (params.BRANCH != 'development') {
                         sh "git checkout ${params.BRANCH}"
-                        echo "✅ Branche changée vers: ${params.BRANCH}"
+                        echo " Branche changée vers: ${params.BRANCH}"
+                    } else {
+                        echo " Utilisation de la branche development (défaut)"
                     }
                 }
+                
                 sh """
-                    echo "=== VARIABLES PYTHON ==="
-                    echo "DOCKER_IMAGE: ${DOCKER_IMAGE}"
+                    echo "=== ENVIRONNEMENT DOCKER ==="
+                    echo "DOCKER_IMAGE: ${env.DOCKER_IMAGE}"
                     echo "BRANCH: ${params.BRANCH}"
-                    python --version
-                    pip --version
+                    docker --version
                 """
             }
         }
@@ -60,8 +62,8 @@ pipeline {
             steps {
                 sh """
                     mkdir -p ${env.RESULTS_DIR}
-                    docker run --rm \
-                      -v \$(pwd)/${env.RESULTS_DIR}:/results \
+                    docker run --rm \\
+                      -v \$(pwd)/${env.RESULTS_DIR}:/results \\
                       ${env.DOCKER_IMAGE}
                 """
             }
@@ -90,7 +92,7 @@ pipeline {
         }
         
         success {
-            echo "✅ Pipeline Python réussi - Branche: ${params.BRANCH}"
+            echo " Pipeline Python réussi - Branche: ${params.BRANCH}"
         }
         
         failure {
