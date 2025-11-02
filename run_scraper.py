@@ -3,8 +3,8 @@ from scraper import scrape_basta_media, export_results
 import sys
 
 def main():
-    print("🚀 SCRAPER BASTA MEDIA - PYTHON")
-    print("=" * 40)
+    print("🚀 SCRAPER BASTA MEDIA - PYTHON (SANS PANDAS)")
+    print("=" * 50)
     
     # Scraping
     articles = scrape_basta_media()
@@ -21,11 +21,11 @@ def main():
             print(f"   🔗 {article['link']}")
             print(f"   📅 {article['date']}")
         
-        # Export dans /results
+        # Export
         success = export_results(articles)
         
         if success:
-            print(f"\n🎯 SCRAPING RÉUSSI - {len(articles)} articles exportés vers /results")
+            print(f"\n🎯 SCRAPING RÉUSSI - {len(articles)} articles exportés")
             sys.exit(0)
         else:
             print("\n❌ ÉCHEC de l'export")

@@ -1,10 +1,9 @@
-# scraper.py
+# scraper.py - VERSION SANS PANDAS
 import requests
 from bs4 import BeautifulSoup
-import pandas as pd
 import json
+import csv
 from datetime import datetime
-import sys
 import os
 
 def scrape_basta_media():
@@ -85,25 +84,24 @@ def scrape_basta_media():
         return []
 
 def export_results(data):
-    """Exporte les résultats en CSV et JSON dans /results"""
+    """Exporte les résultats en CSV et JSON sans Pandas"""
     if not data:
         print("❌ Aucune donnée à exporter")
         return False
     
     try:
-        # Le dossier /results est monté depuis l'hôte via Docker
         output_dir = "/results"
-        
-        # Créer le dossier de sortie
         os.makedirs(output_dir, exist_ok=True)
-        
-        # Date pour le nom des fichiers
         current_date = datetime.now().strftime('%Y-%m-%d')
         
-        # Export CSV
+        # Export CSV sans Pandas
         csv_filename = f"{output_dir}/{current_date}_basta_articles.csv"
-        df = pd.DataFrame(data)
-        df.to_csv(csv_filename, index=False, encoding='utf-8')
+        with open(csv_filename, 'w', newline='', encoding='utf-8') as csvfile:
+            fieldnames = ['title', 'summary', 'link', 'date']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+            for article in data:
+                writer.writerow(article)
         print(f"💾 CSV exporté: {csv_filename}")
         
         # Export JSON
