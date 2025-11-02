@@ -40,13 +40,13 @@ pipeline {
                         echo "✅ Branche changée vers: ${params.BRANCH}"
                     }
                 }
-                sh '''
+                sh """
                     echo "=== VARIABLES PYTHON ==="
                     echo "DOCKER_IMAGE: ${DOCKER_IMAGE}"
                     echo "BRANCH: ${params.BRANCH}"
                     python --version
                     pip --version
-                '''
+                """
             }
         }
         
